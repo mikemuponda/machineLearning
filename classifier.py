@@ -7,6 +7,18 @@ import numpy as np
 import random
 import os
 
+class MultinomialLogisticRegression(nn.Module):
+    def __init__(self,input_size,hidden_size,classes):
+        super(MultinomialLogisticRegression, self).__init__()
+        self.linear1 = nn.Linear(input_size,hidden_size)
+        self.linear2=nn.Linear(hidden_size,classes)
+
+    def forward(self, feature):
+        output=torch.relu(self.linear1(feature))
+        output=self.linear2(output)
+        output=torch.softmax(output,dim=1)
+        return output
+    
 DATA_DIR=""
 if('MNIST data' in os.listdir()):
     DATA_DIR="./MNIST data"
@@ -46,3 +58,4 @@ test_dataset = torch.utils.data.TensorDataset(X_test, y_test)
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = torch.utils.data.DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
+
