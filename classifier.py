@@ -7,6 +7,7 @@ import numpy as np
 import random
 import os
 from torch.nn import functional as F
+from PIL import Image
 class MultinomialLogisticRegression(nn.Module):
     def __init__(self,input_size,hidden_size,classes):
         super(MultinomialLogisticRegression, self).__init__()
@@ -21,12 +22,19 @@ class MultinomialLogisticRegression(nn.Module):
         output=F.log_softmax(output,dim=1)
         return output
     
+def ConvertImageToTensor(image_path):
+    img = Image.open(image_path)
+    img_2dvector = np.array(img)
+    flattened_img=img_2dvector.flatten()
+    img_tensor=torch.tensor(flattened_img,dtype=torch.float32)
+    img_tensor = img_tensor.unsqueeze(0)
+    return img_tensor
+
 DATA_DIR=""
 if('MNIST data' in os.listdir()):
     DATA_DIR="./MNIST data"
 else:
     DATA_DIR = "."
-
 download_dataset = False
 
 train_mnist = datasets.MNIST(DATA_DIR, train=True, download=download_dataset)
@@ -97,4 +105,12 @@ for epoch in range(num_epochs):
         correct += (predicted == labels).sum()
     accuracy = 100 * correct.item() / total
 
-    print('Validation Accuracy: {} %'.format(accuracy))
+print('Validation Accuracy: {} %'.format(accuracy))
+print('Training complete')
+image_path = input("Please enter image path: ")
+image_tensor=ConvertImageToTensor(image_path)
+with torch.no_grad():
+    model.eval()
+    outputs = model(image_tensor)
+    predicted_class = torch.argmax(outputs, dim=1).item()
+print("Predicted Class: ", predicted_class)
