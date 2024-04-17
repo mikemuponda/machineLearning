@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 import os
-
+from torch.nn import functional as F
 class MultinomialLogisticRegression(nn.Module):
     def __init__(self,input_size,hidden_size,classes):
         super(MultinomialLogisticRegression, self).__init__()
@@ -50,7 +50,7 @@ X_train = X_train.reshape(-1, 28*28)
 X_valid = X_valid.reshape(-1, 28*28)
 X_test = X_test.reshape(-1, 28*28)
 
-batch_size = 64
+batch_size = 141
 train_dataset = torch.utils.data.TensorDataset(X_train, y_train)
 val_dataset = torch.utils.data.TensorDataset(X_valid, y_valid)
 test_dataset = torch.utils.data.TensorDataset(X_test, y_test)
@@ -59,3 +59,40 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=bat
 val_loader = torch.utils.data.DataLoader(dataset=val_dataset, batch_size=batch_size, shuffle=False)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
+num_epochs=10
+learning_rate=0.01
+input_size=28*28
+hidden_size=128
+classes=10
+
+model = MultinomialLogisticRegression(input_size,hidden_size,classes)
+optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+total_step = len(train_loader)
+
+
+for epoch in range(num_epochs):
+    for i, (images, labels) in enumerate(train_loader):
+        outputs = model(images)
+        labels = labels.long()
+        
+        loss = F.cross_entropy(outputs, labels)
+        optimizer.zero_grad()
+
+        loss.backward()
+        optimizer.step()
+
+        if (i+1) % 50 == 0:
+            print ('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}' 
+                   .format(epoch+1, num_epochs, i+1, total_step, loss.item()))
+            
+    model.eval()
+    correct = 0
+    total = 0
+    for images, labels in val_loader:
+        outputs = model(images)
+        predicted = torch.argmax(outputs,dim=1)
+        total += labels.size(0)
+        correct += (predicted == labels).sum()
+    accuracy = 100 * correct.item() / total
+
+    print('Validation Accuracy: {} %'.format(accuracy))
