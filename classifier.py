@@ -68,7 +68,7 @@ hidden_size=[128,64]
 classes=10
 
 model = MultinomialLogisticRegression(input_size,hidden_size,classes)
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 total_step = len(train_loader)
 
 
