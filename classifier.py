@@ -10,13 +10,15 @@ from torch.nn import functional as F
 class MultinomialLogisticRegression(nn.Module):
     def __init__(self,input_size,hidden_size,classes):
         super(MultinomialLogisticRegression, self).__init__()
-        self.linear1 = nn.Linear(input_size,hidden_size)
-        self.linear2=nn.Linear(hidden_size,classes)
+        self.linear1 = nn.Linear(input_size,hidden_size[0])
+        self.linear2=nn.Linear(hidden_size[0],hidden_size[1])
+        self.linear3=nn.Linear(hidden_size[1],classes)
 
     def forward(self, feature):
         output=torch.relu(self.linear1(feature))
-        output=self.linear2(output)
-        output=torch.softmax(output,dim=1)
+        output=torch.relu(self.linear2(output))
+        output=self.linear3(output)
+        output=F.log_softmax(output,dim=1)
         return output
     
 DATA_DIR=""
@@ -50,7 +52,7 @@ X_train = X_train.reshape(-1, 28*28)
 X_valid = X_valid.reshape(-1, 28*28)
 X_test = X_test.reshape(-1, 28*28)
 
-batch_size = 141
+batch_size = 48
 train_dataset = torch.utils.data.TensorDataset(X_train, y_train)
 val_dataset = torch.utils.data.TensorDataset(X_valid, y_valid)
 test_dataset = torch.utils.data.TensorDataset(X_test, y_test)
@@ -60,9 +62,9 @@ val_loader = torch.utils.data.DataLoader(dataset=val_dataset, batch_size=batch_s
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
 
 num_epochs=10
-learning_rate=0.01
+learning_rate=0.001
 input_size=28*28
-hidden_size=128
+hidden_size=[128,64]
 classes=10
 
 model = MultinomialLogisticRegression(input_size,hidden_size,classes)
