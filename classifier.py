@@ -59,6 +59,7 @@ y_train = np.delete(y_train, indices, axis=0)
 X_train = X_train.reshape(-1, 28*28)
 X_valid = X_valid.reshape(-1, 28*28)
 X_test = X_test.reshape(-1, 28*28)
+print(X_train.shape)
 
 batch_size = 48
 train_dataset = torch.utils.data.TensorDataset(X_train, y_train)
@@ -94,11 +95,21 @@ for epoch in range(num_epochs):
         if (i+1) % 50 == 0:
             print ('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}' 
                    .format(epoch+1, num_epochs, i+1, total_step, loss.item()))
+            # Compute validation accuracy
+            correct = 0
+            total = 0
+            for images, labels in val_loader:
+                outputs = model(images)
+                predicted = torch.argmax(outputs,dim=1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum()
+            accuracy = 100 * correct.item() / total
+            print('Validation Accuracy: {} %'.format(accuracy))
             
     model.eval()
     correct = 0
     total = 0
-    for images, labels in val_loader:
+    for images, labels in test_loader:
         outputs = model(images)
         predicted = torch.argmax(outputs,dim=1)
         total += labels.size(0)
