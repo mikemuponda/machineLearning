@@ -11,11 +11,13 @@ from PIL import Image
 class MultinomialLogisticRegression(nn.Module):
     def __init__(self,input_size,hidden_size,classes):
         super(MultinomialLogisticRegression, self).__init__()
+        self.dropout=nn.Dropout(0.2)
         self.linear1 = nn.Linear(input_size,hidden_size[0])
         self.linear2=nn.Linear(hidden_size[0],hidden_size[1])
         self.linear3=nn.Linear(hidden_size[1],classes)
 
     def forward(self, feature):
+        #output=self.dropout(feature)
         output=torch.relu(self.linear1(feature))
         output=torch.relu(self.linear2(output))
         output=self.linear3(output)
@@ -59,7 +61,6 @@ y_train = np.delete(y_train, indices, axis=0)
 X_train = X_train.reshape(-1, 28*28)
 X_valid = X_valid.reshape(-1, 28*28)
 X_test = X_test.reshape(-1, 28*28)
-print(X_train.shape)
 
 batch_size = 48
 train_dataset = torch.utils.data.TensorDataset(X_train, y_train)
@@ -104,7 +105,7 @@ for epoch in range(num_epochs):
                 total += labels.size(0)
                 correct += (predicted == labels).sum()
             accuracy = 100 * correct.item() / total
-            print('Validation Accuracy: {} %'.format(accuracy))
+            print('Training Validation Accuracy: {} % \n'.format(accuracy))
             
     model.eval()
     correct = 0
@@ -116,7 +117,7 @@ for epoch in range(num_epochs):
         correct += (predicted == labels).sum()
     accuracy = 100 * correct.item() / total
 
-print('Validation Accuracy: {} %'.format(accuracy))
+print('Testing Validation Accuracy: {} %'.format(accuracy))
 print('Training complete')
 image_path = input("Please enter image path: ")
 image_tensor=ConvertImageToTensor(image_path)
