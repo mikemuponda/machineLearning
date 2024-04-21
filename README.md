@@ -11,6 +11,11 @@ function for all layers except the output layer which uses a softmax classificat
 - conda (environment management)
 - git (version control)
 
+## Usage Instructions
+1) Navigate to directory containing MLenv.yml
+2) conda env create -f MLenv.yaml
+3) conda activate MLenv
+4) python classifier.py
 
 Acknowledgments
 Meyer, F. (2023). ML Lab 2: Logistic Regression Convolutional Neural Networks. [Jupyter Notebook]. Department of Computer Science, University of Cape Town. Retrieved from https://amathuba.uct.ac.za/d2l/lms/dropbox/user/folder_submit_files.d2l?db=17414&grpid=0&isprv=0&bp=0&ou=33714
