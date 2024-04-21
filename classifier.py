@@ -17,7 +17,7 @@ class MultinomialLogisticRegression(nn.Module):
         self.linear3=nn.Linear(hidden_size[1],classes)
 
     def forward(self, feature):
-        #output=self.dropout(feature)
+        output=self.dropout(feature)
         output=torch.relu(self.linear1(feature))
         output=torch.relu(self.linear2(output))
         output=self.linear3(output)
