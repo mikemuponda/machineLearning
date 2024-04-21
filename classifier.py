@@ -8,6 +8,7 @@ import random
 import os
 from torch.nn import functional as F
 from PIL import Image
+import sys
 class MultinomialLogisticRegression(nn.Module):
     def __init__(self,input_size,hidden_size,classes):
         super(MultinomialLogisticRegression, self).__init__()
@@ -81,48 +82,52 @@ model = MultinomialLogisticRegression(input_size,hidden_size,classes)
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 total_step = len(train_loader)
 
-
-for epoch in range(num_epochs):
-    for i, (images, labels) in enumerate(train_loader):
-        outputs = model(images)
-        labels = labels.long()
-        
-        loss = F.cross_entropy(outputs, labels)
-        optimizer.zero_grad()
-
-        loss.backward()
-        optimizer.step()
-
-        if (i+1) % 50 == 0:
-            print ('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}' 
-                   .format(epoch+1, num_epochs, i+1, total_step, loss.item()))
-            # Compute validation accuracy
-            correct = 0
-            total = 0
-            for images, labels in val_loader:
-                outputs = model(images)
-                predicted = torch.argmax(outputs,dim=1)
-                total += labels.size(0)
-                correct += (predicted == labels).sum()
-            accuracy = 100 * correct.item() / total
-            print('Training Validation Accuracy: {} % \n'.format(accuracy))
+with open('log.txt', 'w') as f:
+    cli_stdout = sys.stdout
+    sys.stdout = f
+    for epoch in range(num_epochs):
+        for i, (images, labels) in enumerate(train_loader):
+            outputs = model(images)
+            labels = labels.long()
             
-    model.eval()
-    correct = 0
-    total = 0
-    for images, labels in test_loader:
-        outputs = model(images)
-        predicted = torch.argmax(outputs,dim=1)
-        total += labels.size(0)
-        correct += (predicted == labels).sum()
-    accuracy = 100 * correct.item() / total
+            loss = F.cross_entropy(outputs, labels)
+            optimizer.zero_grad()
 
-print('Testing Validation Accuracy: {} %'.format(accuracy))
-print('Training complete')
-image_path = input("Please enter image path: ")
-image_tensor=ConvertImageToTensor(image_path)
-with torch.no_grad():
-    model.eval()
-    outputs = model(image_tensor)
-    predicted_class = torch.argmax(outputs, dim=1).item()
-print("Predicted Class: ", predicted_class)
+            loss.backward()
+            optimizer.step()
+
+            if (i+1) % 50 == 0:
+                print ('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}' 
+                    .format(epoch+1, num_epochs, i+1, total_step, loss.item()))
+                # Compute validation accuracy
+                correct = 0
+                total = 0
+                for images, labels in val_loader:
+                    outputs = model(images)
+                    predicted = torch.argmax(outputs,dim=1)
+                    total += labels.size(0)
+                    correct += (predicted == labels).sum()
+                accuracy = 100 * correct.item() / total
+                print('Training Validation Accuracy: {} % \n'.format(accuracy))
+                
+        model.eval()
+        correct = 0
+        total = 0
+        for images, labels in test_loader:
+            outputs = model(images)
+            predicted = torch.argmax(outputs,dim=1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum()
+        accuracy = 100 * correct.item() / total
+
+    print('Testing Validation Accuracy: {} %'.format(accuracy))
+    print('Training complete')
+    sys.stdout=cli_stdout
+    image_path = input("Please enter image path: ")
+    image_tensor=ConvertImageToTensor(image_path)
+    with torch.no_grad():
+        model.eval()
+        outputs = model(image_tensor)
+        predicted_class = torch.argmax(outputs, dim=1).item()
+    sys.stdout=f
+    print("Predicted Class: ", predicted_class)
